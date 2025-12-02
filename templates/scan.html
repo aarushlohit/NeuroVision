@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRI Scan Analysis - NeuroScan AI</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scan-page.css') }}">
+</head>
+<body class="scan-page-body">
+    
+    <!-- Navigation -->
+    <nav class="navbar scan-navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="/" class="logo">
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NeuroScan AI" class="logo-icon">
+                    <span class="logo-text">NeuroScan<span class="ai-badge">AI</span></span>
+                </a>
+                <ul class="nav-links">
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/#about" class="nav-link">About</a></li>
+                    <li><a href="/#features" class="nav-link">Features</a></li>
+                    <li><a href="/scan" class="nav-link active">Scan</a></li>
+                    <li><a href="/#how-it-works" class="nav-link">How It Works</a></li>
+                    <li><a href="/#architecture" class="nav-link">Architecture</a></li>
+                </ul>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Scan Experience -->
+    <main class="scan-experience">
+        <!-- Background Elements -->
+        <div class="scan-bg-elements">
+            <div class="bg-gradient-mesh"></div>
+            <div class="floating-medical-icons">
+                <div class="med-icon icon-1"><i class="fas fa-heartbeat"></i></div>
+                <div class="med-icon icon-2"><i class="fas fa-brain"></i></div>
+                <div class="med-icon icon-3"><i class="fas fa-dna"></i></div>
+                <div class="med-icon icon-4"><i class="fas fa-microscope"></i></div>
+                <div class="med-icon icon-5"><i class="fas fa-stethoscope"></i></div>
+            </div>
+            <div class="pulse-rings">
+                <div class="pulse-ring ring-1"></div>
+                <div class="pulse-ring ring-2"></div>
+                <div class="pulse-ring ring-3"></div>
+            </div>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="scan-progress-tracker" id="progressTracker">
+            <div class="progress-step completed" data-step="1">
+                <div class="step-icon">
+                    <i class="fas fa-hospital-user"></i>
+                </div>
+                <span>Check-in</span>
+            </div>
+            <div class="progress-connector"></div>
+            <div class="progress-step active" data-step="2">
+                <div class="step-icon">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <span>Upload Scan</span>
+            </div>
+            <div class="progress-connector"></div>
+            <div class="progress-step" data-step="3">
+                <div class="step-icon">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <span>AI Analysis</span>
+            </div>
+            <div class="progress-connector"></div>
+            <div class="progress-step" data-step="4">
+                <div class="step-icon">
+                    <i class="fas fa-file-medical-alt"></i>
+                </div>
+                <span>Results</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Welcome / Check-in (Initially Hidden) -->
+        <section class="scan-step step-checkin" id="stepCheckin" style="display: none;">
+            <!-- Content would appear here on initial load -->
+        </section>
+
+        <!-- Step 2: Upload Section -->
+        <section class="scan-step step-upload active" id="stepUpload">
+            <div class="container">
+                <div class="upload-experience">
+                    <!-- Left Panel: Doctor Illustration -->
+                    <div class="doctor-panel">
+                        <div class="doctor-illustration">
+                            <div class="doctor-avatar-large">
+                                <div class="avatar-ring"></div>
+                                <div class="avatar-image">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                                <div class="status-badge online">
+                                    <span class="pulse-dot"></span>
+                                    Online
+                                </div>
+                            </div>
+                            <div class="doctor-info-card">
+                                <h3>Dr. NeuroScan AI</h3>
+                                <p class="specialty">AI Neuroradiology Specialist</p>
+                                <div class="credentials">
+                                    <div class="credential">
+                                        <i class="fas fa-award"></i>
+                                        <span>97.92% Accuracy</span>
+                                    </div>
+                                    <div class="credential">
+                                        <i class="fas fa-brain"></i>
+                                        <span>3,929+ Scans Analyzed</span>
+                                    </div>
+                                    <div class="credential">
+                                        <i class="fas fa-bolt"></i>
+                                        <span>&lt;3s Analysis Time</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="doctor-message">
+                            <div class="message-bubble">
+                                <div class="typing-indicator" id="typingIndicator">
+                                    <span></span><span></span><span></span>
+                                </div>
+                                <p id="doctorMessage">Hello! I'm ready to analyze your MRI scan. Please upload a brain MRI image and I'll provide a detailed analysis within seconds.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Upload Area -->
+                    <div class="upload-panel">
+                        <div class="upload-card-premium">
+                            <div class="card-header">
+                                <div class="header-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="header-text">
+                                    <h2>Upload MRI Scan</h2>
+                                    <p>Drag & drop or click to select your brain MRI image</p>
+                                </div>
+                            </div>
+
+                            <div class="upload-zone" id="uploadZone">
+                                <input type="file" id="fileInput" accept="image/*,.tif,.tiff" hidden>
+                                
+                                <div class="upload-content" id="uploadContent">
+                                    <div class="upload-illustration">
+                                        <div class="scan-preview-box">
+                                            <div class="brain-outline">
+                                                <i class="fas fa-brain"></i>
+                                            </div>
+                                            <div class="scan-lines">
+                                                <span></span><span></span><span></span>
+                                            </div>
+                                        </div>
+                                        <div class="upload-arrow">
+                                            <i class="fas fa-arrow-up"></i>
+                                        </div>
+                                    </div>
+                                    <h3>Drop your MRI scan here</h3>
+                                    <p>or <span class="browse-link">browse files</span></p>
+                                    <div class="format-badges">
+                                        <span class="format-badge">JPG</span>
+                                        <span class="format-badge">PNG</span>
+                                        <span class="format-badge">TIFF</span>
+                                        <span class="format-badge">TIF</span>
+                                    </div>
+                                    <p class="size-limit">Maximum file size: 16MB</p>
+                                </div>
+
+                                <!-- Preview State -->
+                                <div class="preview-content" id="previewContent" style="display: none;">
+                                    <div class="preview-image-container">
+                                        <img id="previewImage" src="" alt="MRI Preview">
+                                        <div class="preview-overlay">
+                                            <button class="remove-image-btn" id="removeImageBtn">
+                                                <i class="fas fa-times"></i>
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="file-info" id="fileInfo">
+                                        <i class="fas fa-file-medical"></i>
+                                        <span class="file-name">scan.jpg</span>
+                                        <span class="file-size">2.4 MB</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="analyze-btn" id="analyzeBtn" disabled>
+                                <span class="btn-content">
+                                    <i class="fas fa-search-plus"></i>
+                                    <span>Begin Analysis</span>
+                                </span>
+                                <span class="btn-loader" style="display: none;">
+                                    <i class="fas fa-circle-notch fa-spin"></i>
+                                    <span>Preparing...</span>
+                                </span>
+                            </button>
+
+                            <div class="upload-features">
+                                <div class="feature">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Secure & Private</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Instant Processing</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-lock"></i>
+                                    <span>Data Not Stored</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 3: Analysis in Progress -->
+        <section class="scan-step step-analysis" id="stepAnalysis" style="display: none;">
+            <div class="container">
+                <div class="analysis-experience">
+                    <!-- Medical Room Environment -->
+                    <div class="medical-room">
+                        <div class="room-background">
+                            <div class="room-gradient"></div>
+                            <div class="medical-equipment">
+                                <div class="equipment mri-machine">
+                                    <div class="machine-body">
+                                        <div class="machine-ring ring-outer"></div>
+                                        <div class="machine-ring ring-inner"></div>
+                                        <div class="scan-bed">
+                                            <div class="patient-area">
+                                                <img id="scanningImage" src="" alt="Scanning MRI">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="machine-lights">
+                                        <span class="light active"></span>
+                                        <span class="light"></span>
+                                        <span class="light"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analysis Monitor -->
+                        <div class="analysis-monitor">
+                            <div class="monitor-frame">
+                                <div class="monitor-header">
+                                    <div class="monitor-dots">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <span class="monitor-title">NeuroScan AI Analysis</span>
+                                </div>
+                                <div class="monitor-screen">
+                                    <div class="scan-display">
+                                        <div class="scan-image-wrapper">
+                                            <img id="monitorScanImage" src="" alt="MRI Analysis">
+                                            <div class="scanning-effect">
+                                                <div class="scan-line"></div>
+                                            </div>
+                                            <div class="detection-markers" id="detectionMarkers">
+                                                <!-- Dynamic markers will appear here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="analysis-data">
+                                        <div class="data-readout">
+                                            <div class="readout-item">
+                                                <span class="readout-label">Status</span>
+                                                <span class="readout-value processing" id="analysisStatus">
+                                                    <i class="fas fa-circle-notch fa-spin"></i>
+                                                    Processing...
+                                                </span>
+                                            </div>
+                                            <div class="readout-item">
+                                                <span class="readout-label">Stage</span>
+                                                <span class="readout-value" id="analysisStage">Classification</span>
+                                            </div>
+                                            <div class="readout-item">
+                                                <span class="readout-label">Model</span>
+                                                <span class="readout-value" id="activeModel">ResNet-50</span>
+                                            </div>
+                                        </div>
+                                        <div class="neural-activity">
+                                            <span class="activity-label">Neural Network Activity</span>
+                                            <div class="activity-bars">
+                                                <div class="bar" style="--delay: 0s;"></div>
+                                                <div class="bar" style="--delay: 0.1s;"></div>
+                                                <div class="bar" style="--delay: 0.2s;"></div>
+                                                <div class="bar" style="--delay: 0.3s;"></div>
+                                                <div class="bar" style="--delay: 0.4s;"></div>
+                                                <div class="bar" style="--delay: 0.5s;"></div>
+                                                <div class="bar" style="--delay: 0.6s;"></div>
+                                                <div class="bar" style="--delay: 0.7s;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Doctor Analysis Panel -->
+                        <div class="doctor-analysis-panel">
+                            <div class="doctor-mini">
+                                <div class="mini-avatar">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                                <div class="mini-status">
+                                    <span class="status-text">Analyzing</span>
+                                    <span class="status-dots"><span></span><span></span><span></span></span>
+                                </div>
+                            </div>
+                            <div class="analysis-steps">
+                                <div class="analysis-step active" id="analysisStep1">
+                                    <div class="step-check">
+                                        <i class="fas fa-circle-notch fa-spin"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <span class="step-name">Image Preprocessing</span>
+                                        <span class="step-desc">Resizing and normalizing image data</span>
+                                    </div>
+                                </div>
+                                <div class="analysis-step" id="analysisStep2">
+                                    <div class="step-check">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <span class="step-name">Tumor Classification</span>
+                                        <span class="step-desc">Running ResNet-50 neural network</span>
+                                    </div>
+                                </div>
+                                <div class="analysis-step" id="analysisStep3">
+                                    <div class="step-check">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <span class="step-name">Tumor Segmentation</span>
+                                        <span class="step-desc">Localizing with ResUNet model</span>
+                                    </div>
+                                </div>
+                                <div class="analysis-step" id="analysisStep4">
+                                    <div class="step-check">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="step-info">
+                                        <span class="step-name">Generating Report</span>
+                                        <span class="step-desc">Compiling analysis results</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-bar-track">
+                                    <div class="progress-bar-fill" id="analysisProgress"></div>
+                                </div>
+                                <span class="progress-percentage" id="progressPercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 4: Results -->
+        <section class="scan-step step-results" id="stepResults" style="display: none;">
+            <div class="container">
+                <div class="results-experience">
+                    <!-- Results Header -->
+                    <div class="results-header-banner" id="resultsBanner">
+                        <div class="banner-content">
+                            <div class="result-status" id="resultStatus">
+                                <!-- Dynamic: tumor-detected or healthy -->
+                                <div class="status-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="status-text">
+                                    <h2>Analysis Complete</h2>
+                                    <p id="statusMessage">Results ready for review</p>
+                                </div>
+                            </div>
+                            <div class="confidence-display">
+                                <div class="confidence-ring">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+                                        <circle class="ring-fill" id="confidenceRing" cx="50" cy="50" r="45" 
+                                            stroke-dasharray="283" stroke-dashoffset="283"></circle>
+                                    </svg>
+                                    <div class="confidence-value">
+                                        <span class="value" id="confidenceValue">0</span>
+                                        <span class="percent">%</span>
+                                    </div>
+                                </div>
+                                <span class="confidence-label">Confidence Score</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medical Report Card -->
+                    <div class="medical-report">
+                        <div class="report-header">
+                            <div class="report-logo">
+                                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NeuroScan AI">
+                                <span>NeuroScan AI</span>
+                            </div>
+                            <div class="report-meta">
+                                <span class="report-id" id="reportId">Report #NS-2024-XXXXX</span>
+                                <span class="report-date" id="reportDate">December 2, 2025</span>
+                            </div>
+                        </div>
+
+                        <div class="report-body">
+                            <!-- Image Comparison Section -->
+                            <div class="image-comparison-section">
+                                <h3><i class="fas fa-images"></i> Scan Analysis</h3>
+                                <div class="comparison-grid">
+                                    <div class="comparison-item">
+                                        <div class="image-frame">
+                                            <img id="originalImage" src="" alt="Original MRI">
+                                            <div class="image-label">Original Scan</div>
+                                        </div>
+                                    </div>
+                                    <div class="comparison-item tumor-only" id="maskContainer">
+                                        <div class="image-frame">
+                                            <img id="maskImage" src="" alt="Tumor Mask">
+                                            <div class="image-label">Tumor Detection Mask</div>
+                                        </div>
+                                    </div>
+                                    <div class="comparison-item tumor-only" id="overlayContainer">
+                                        <div class="image-frame">
+                                            <img id="overlayImage" src="" alt="Overlay">
+                                            <div class="image-label">Segmentation Overlay</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Diagnosis Section -->
+                            <div class="diagnosis-section">
+                                <h3><i class="fas fa-stethoscope"></i> AI Diagnosis</h3>
+                                <div class="diagnosis-card" id="diagnosisCard">
+                                    <div class="diagnosis-indicator">
+                                        <div class="indicator-icon" id="diagnosisIcon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    </div>
+                                    <div class="diagnosis-content">
+                                        <h4 id="diagnosisTitle">No Tumor Detected</h4>
+                                        <p id="diagnosisDescription">The AI analysis indicates no abnormal growths or tumors in the scanned brain region.</p>
+                                    </div>
+                                    <div class="diagnosis-scores">
+                                        <div class="score-item">
+                                            <span class="score-label">Tumor Probability</span>
+                                            <div class="score-bar">
+                                                <div class="score-fill tumor" id="tumorScoreBar" style="width: 0%"></div>
+                                            </div>
+                                            <span class="score-value" id="tumorScore">0%</span>
+                                        </div>
+                                        <div class="score-item">
+                                            <span class="score-label">Healthy Probability</span>
+                                            <div class="score-bar">
+                                                <div class="score-fill healthy" id="healthyScoreBar" style="width: 0%"></div>
+                                            </div>
+                                            <span class="score-value" id="healthyScore">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tumor Metrics (Only shown if tumor detected) -->
+                            <div class="tumor-metrics-section" id="tumorMetrics" style="display: none;">
+                                <h3><i class="fas fa-ruler-combined"></i> Tumor Metrics</h3>
+                                <div class="metrics-grid">
+                                    <div class="metric-card">
+                                        <div class="metric-icon">
+                                            <i class="fas fa-percentage"></i>
+                                        </div>
+                                        <div class="metric-value" id="tumorAreaPercent">0%</div>
+                                        <div class="metric-label">Affected Area</div>
+                                        <p class="metric-desc">Percentage of scan area with detected tumor</p>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-icon">
+                                            <i class="fas fa-th"></i>
+                                        </div>
+                                        <div class="metric-value" id="tumorPixels">0</div>
+                                        <div class="metric-label">Tumor Pixels</div>
+                                        <p class="metric-desc">Total pixels identified as tumor tissue</p>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-icon">
+                                            <i class="fas fa-brain"></i>
+                                        </div>
+                                        <div class="metric-value">ResUNet</div>
+                                        <div class="metric-label">Segmentation Model</div>
+                                        <p class="metric-desc">U-Net architecture with residual connections</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Technical Details -->
+                            <div class="technical-section">
+                                <h3><i class="fas fa-microchip"></i> Technical Analysis Details</h3>
+                                <div class="tech-details-grid">
+                                    <div class="tech-detail">
+                                        <span class="detail-label">Classification Model</span>
+                                        <span class="detail-value">ResNet-50 (50 layers)</span>
+                                    </div>
+                                    <div class="tech-detail">
+                                        <span class="detail-label">Segmentation Model</span>
+                                        <span class="detail-value">ResUNet</span>
+                                    </div>
+                                    <div class="tech-detail">
+                                        <span class="detail-label">Input Resolution</span>
+                                        <span class="detail-value">256 × 256 × 3</span>
+                                    </div>
+                                    <div class="tech-detail">
+                                        <span class="detail-label">Processing Framework</span>
+                                        <span class="detail-value">TensorFlow / Keras</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Disclaimer -->
+                            <div class="disclaimer-section">
+                                <div class="disclaimer-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="disclaimer-content">
+                                    <h4>Important Medical Disclaimer</h4>
+                                    <p>This AI-generated analysis is for research and educational purposes only. It should not be used as a substitute for professional medical diagnosis. Please consult with a qualified healthcare provider for proper medical evaluation and treatment recommendations.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Report Actions -->
+                        <div class="report-actions">
+                            <button class="action-btn secondary" id="newScanBtn">
+                                <i class="fas fa-redo"></i>
+                                New Scan
+                            </button>
+                            <button class="action-btn primary" id="downloadReportBtn">
+                                <i class="fas fa-download"></i>
+                                Download Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Minimal Footer -->
+    <footer class="scan-footer">
+        <div class="container">
+            <div class="footer-minimal">
+                <span>&copy; 2024 NeuroScan AI</span>
+                <span class="separator">•</span>
+                <span>For Research & Educational Purposes Only</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scan-page.js') }}"></script>
+    
+</body>
+</html>
