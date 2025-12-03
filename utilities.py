@@ -339,19 +339,20 @@ class EnhancedDataGenerator(tf.keras.utils.Sequence):
 # ENHANCED PREDICTION FUNCTION WITH TTA
 # ============================================================================
 
-def prediction(test, model, model_seg, use_tta=False):
+def prediction(test, model, model_seg, use_tta=True):
     """
-    Enhanced prediction function with optional Test Time Augmentation (TTA).
+    Enhanced prediction function with Test Time Augmentation (TTA).
+    EXACTLY matches notebook preprocessing for consistent accuracy.
     
     Two-stage prediction:
-    1. Classification: Does the image have a tumor?
-    2. Segmentation: If yes, where is the tumor located?
+    1. Classification: Does the image have a tumor? (rescale=1./255.)
+    2. Segmentation: If yes, where is the tumor located? (standardization)
     
     Args:
         test: DataFrame with image paths
-        model: Classification model
-        model_seg: Segmentation model
-        use_tta: Enable Test Time Augmentation for better accuracy
+        model: Classification model (trained with ImageDataGenerator rescale=1./255.)
+        model_seg: Segmentation model (trained with DataGenerator standardization)
+        use_tta: Enable Test Time Augmentation for better accuracy (default True)
     """
     directory = "./"
     mask = []
@@ -361,40 +362,46 @@ def prediction(test, model, model_seg, use_tta=False):
     for i in test.image_path:
         path = directory + str(i)
         
-        # Read image
+        # Read image using PIL (same as DataGenerator)
         img = np.array(Image.open(path))
         
-        # Normalize for classification
-        img_norm = img * 1./255.
+        # ============================================================
+        # CLASSIFICATION PREPROCESSING
+        # EXACTLY matches notebook's ImageDataGenerator(rescale=1./255.)
+        # ============================================================
+        img_norm = img.astype(np.float32) / 255.0  # rescale=1./255.
         img_norm = cv2.resize(img_norm, (256, 256))
-        img_norm = np.array(img_norm, dtype=np.float64)
         img_norm = np.reshape(img_norm, (1, 256, 256, 3))
 
-        # Classification prediction (with optional TTA)
+        # Classification prediction (with TTA for better accuracy)
         if use_tta:
             is_defect = predict_with_tta_classification(model, img_norm)
         else:
             is_defect = model.predict(img_norm, verbose=0)
 
-        # If no tumor detected
+        # If no tumor detected (class 0 = no tumor)
         if np.argmax(is_defect) == 0:
             image_id.append(i)
             has_mask.append(0)
             mask.append('No mask')
             continue
 
-        # Prepare for segmentation
-        img = np.array(Image.open(path))
-        X = np.empty((1, 256, 256, 3))
-        img = cv2.resize(img, (256, 256))
-        img = np.array(img, dtype=np.float64)
+        # ============================================================
+        # SEGMENTATION PREPROCESSING  
+        # EXACTLY matches notebook's DataGenerator (standardization)
+        # ============================================================
+        img_seg = np.array(Image.open(path))
+        img_seg = cv2.resize(img_seg, (256, 256))
+        img_seg = np.array(img_seg, dtype=np.float64)
         
-        # Standardize
-        img -= img.mean()
-        img /= (img.std() + 1e-8)
-        X[0,] = img
+        # Standardize: img -= img.mean(); img /= img.std()
+        img_seg -= img_seg.mean()
+        img_seg /= (img_seg.std() + 1e-8)
+        
+        X = np.empty((1, 256, 256, 3), dtype=np.float64)
+        X[0,] = img_seg
 
-        # Segmentation prediction (with optional TTA)
+        # Segmentation prediction (with TTA for better boundary detection)
         if use_tta:
             predict = predict_with_tta_segmentation(model_seg, X)
         else:
@@ -412,30 +419,43 @@ def prediction(test, model, model_seg, use_tta=False):
     return image_id, mask, has_mask
 
 
-def predict_with_tta_classification(model, img, strategy='max'):
+def predict_with_tta_classification(model, img, strategy='mean'):
     """
     Test Time Augmentation for classification.
+    Applies geometric transforms that match training augmentations from notebook.
+    
+    Training used:
+    - rotation_range=20, horizontal_flip=True, vertical_flip=True
+    - width_shift_range=0.15, height_shift_range=0.15
     
     Args:
         model: Classification model
-        img: Preprocessed image
-        strategy: 'mean' for average, 'max' for maximum confidence
+        img: Preprocessed image (already normalized to [0,1])
+        strategy: 'mean' for average (more stable), 'max' for maximum confidence
     
     Returns:
-        Prediction with higher confidence
+        Prediction with higher confidence through TTA
     """
     predictions = []
     
-    # Original
+    # Original image
     predictions.append(model.predict(img, verbose=0))
     
-    # Horizontal flip
-    img_flip = np.flip(img, axis=2)
-    predictions.append(model.predict(img_flip, verbose=0))
+    # Horizontal flip (matches horizontal_flip=True in training)
+    img_flip_h = np.flip(img, axis=2)
+    predictions.append(model.predict(img_flip_h, verbose=0))
     
-    # Vertical flip
+    # Vertical flip (matches vertical_flip=True in training)
     img_flip_v = np.flip(img, axis=1)
     predictions.append(model.predict(img_flip_v, verbose=0))
+    
+    # Both flips combined
+    img_flip_both = np.flip(np.flip(img, axis=2), axis=1)
+    predictions.append(model.predict(img_flip_both, verbose=0))
+    
+    # 90 degree rotation (close to rotation_range augmentation)
+    img_rot90 = np.rot90(img, axes=(1, 2))
+    predictions.append(model.predict(img_rot90, verbose=0))
     
     if strategy == 'max':
         # Return prediction with highest confidence for detected class
@@ -448,40 +468,62 @@ def predict_with_tta_classification(model, img, strategy='max'):
                 best_pred = pred
         return best_pred
     else:
-        # Average predictions
+        # Average predictions (more stable, reduces false positives/negatives)
         return np.mean(predictions, axis=0)
 
 
 def predict_with_tta_segmentation(model, img):
     """
     Test Time Augmentation for segmentation.
-    Applies geometric transforms and averages the results.
+    Applies geometric transforms and averages the results for better tumor boundary detection.
+    
+    This matches the augmentation style used in DataGenerator during training:
+    - HorizontalFlip, VerticalFlip, RandomRotate90, ShiftScaleRotate, etc.
+    
+    Args:
+        model: Segmentation model (ResUNet)
+        img: Preprocessed image (already standardized)
+    
+    Returns:
+        Averaged prediction mask with improved boundary accuracy
     """
     predictions = []
     
-    # Original
+    # Original prediction
     pred = model.predict(img, verbose=0)
     predictions.append(pred)
     
-    # Horizontal flip
-    img_flip = np.flip(img, axis=2)
-    pred_flip = model.predict(img_flip, verbose=0)
-    pred_flip = np.flip(pred_flip, axis=2)
-    predictions.append(pred_flip)
+    # Horizontal flip (matches training augmentation)
+    img_flip_h = np.flip(img, axis=2)
+    pred_flip_h = model.predict(img_flip_h, verbose=0)
+    pred_flip_h = np.flip(pred_flip_h, axis=2)  # Flip prediction back
+    predictions.append(pred_flip_h)
     
-    # Vertical flip
+    # Vertical flip (matches training augmentation)
     img_flip_v = np.flip(img, axis=1)
     pred_flip_v = model.predict(img_flip_v, verbose=0)
-    pred_flip_v = np.flip(pred_flip_v, axis=1)
+    pred_flip_v = np.flip(pred_flip_v, axis=1)  # Flip prediction back
     predictions.append(pred_flip_v)
     
-    # 90 degree rotation
+    # 90 degree rotation (matches RandomRotate90 in training)
     img_rot90 = np.rot90(img, axes=(1, 2))
     pred_rot90 = model.predict(img_rot90, verbose=0)
-    pred_rot90 = np.rot90(pred_rot90, k=-1, axes=(1, 2))
+    pred_rot90 = np.rot90(pred_rot90, k=-1, axes=(1, 2))  # Rotate prediction back
     predictions.append(pred_rot90)
     
-    # Average all predictions
+    # 180 degree rotation
+    img_rot180 = np.rot90(img, k=2, axes=(1, 2))
+    pred_rot180 = model.predict(img_rot180, verbose=0)
+    pred_rot180 = np.rot90(pred_rot180, k=-2, axes=(1, 2))  # Rotate prediction back
+    predictions.append(pred_rot180)
+    
+    # 270 degree rotation
+    img_rot270 = np.rot90(img, k=3, axes=(1, 2))
+    pred_rot270 = model.predict(img_rot270, verbose=0)
+    pred_rot270 = np.rot90(pred_rot270, k=-3, axes=(1, 2))  # Rotate prediction back
+    predictions.append(pred_rot270)
+    
+    # Average all predictions for robust tumor segmentation
     return np.mean(predictions, axis=0)
 
 

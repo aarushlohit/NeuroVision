@@ -85,6 +85,7 @@ def load_models():
     try:
         # ============================================================
         # LOAD PRIMARY CLASSIFICATION MODEL (ResNet-50)
+        # Matches notebook: model.compile with label_smoothing and comprehensive metrics
         # ============================================================
         print("Loading primary classification model (ResNet-50)...")
         with open('resnet-50-MRI.json', 'r') as json_file:
@@ -92,10 +93,16 @@ def load_models():
         json_savedModel = json_savedModel.replace('"class_name": "Model"', '"class_name": "Functional"')
         classification_model = tf.keras.models.model_from_json(json_savedModel, custom_objects=custom_objects)
         classification_model.load_weights('weights.hdf5')
+        # Compile EXACTLY like notebook for consistent inference
         classification_model.compile(
-            loss='categorical_crossentropy',
-            optimizer='adam',
-            metrics=["accuracy"]
+            loss=tf.keras.losses.CategoricalCrossentropy(label_smoothing=0.1),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5),  # Fine-tuned LR from notebook
+            metrics=[
+                'accuracy',
+                tf.keras.metrics.Precision(name='precision'),
+                tf.keras.metrics.Recall(name='recall'),
+                tf.keras.metrics.AUC(name='auc')
+            ]
         )
         classification_models.append(('ResNet-50', classification_model))
         print("✓ Primary classification model loaded successfully")
@@ -136,6 +143,7 @@ def load_models():
         
         # ============================================================
         # LOAD PRIMARY SEGMENTATION MODEL (ResUNet-MRI)
+        # Matches notebook: model_seg.compile with focal_tversky and comprehensive metrics
         # ============================================================
         print("Loading primary segmentation model (ResUNet-MRI)...")
         with open('ResUNet-MRI.json', 'r') as json_file:
@@ -143,11 +151,17 @@ def load_models():
         json_savedModel = json_savedModel.replace('"class_name": "Model"', '"class_name": "Functional"')
         segmentation_model = tf.keras.models.model_from_json(json_savedModel, custom_objects=custom_objects)
         segmentation_model.load_weights('weights_seg.hdf5')
-        adam = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=0.1)
+        # Compile EXACTLY like notebook for consistent inference
         segmentation_model.compile(
-            optimizer=adam,
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),  # Same as notebook
             loss=focal_tversky,
-            metrics=[tversky, dice_coefficient, iou_score]
+            metrics=[
+                tversky,
+                dice_coefficient,
+                iou_score,
+                sensitivity,
+                specificity
+            ]
         )
         segmentation_models.append(('ResUNet-MRI', segmentation_model))
         print("✓ Primary segmentation model loaded successfully")
@@ -165,11 +179,11 @@ def load_models():
                 # Use same weights if no separate weights file exists
                 if os.path.exists('weights_seg.hdf5'):
                     secondary_segmentation.load_weights('weights_seg.hdf5')
-                    adam = tf.keras.optimizers.Adam(learning_rate=0.05, epsilon=0.1)
+                    # Compile EXACTLY like notebook
                     secondary_segmentation.compile(
-                        optimizer=adam,
+                        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
                         loss=focal_tversky,
-                        metrics=[tversky, dice_coefficient, iou_score]
+                        metrics=[tversky, dice_coefficient, iou_score, sensitivity, specificity]
                     )
                     segmentation_models.append(('ResUNet-Alt', secondary_segmentation))
                     print("✓ Secondary segmentation model loaded successfully")
@@ -192,34 +206,27 @@ def load_models():
         return False
 
 
-def preprocess_image_classification(img, use_clahe=False):
+def preprocess_image_classification(img):
     """
-    Preprocessing for classification model - matches original training preprocessing.
-    CLAHE is optional as models were trained without it.
+    Preprocessing for classification model - EXACTLY matches notebook's ImageDataGenerator.
+    Uses rescale=1./255. as in training (flow_from_dataframe with rescale=1./255.).
     """
-    # Resize to 256x256
+    # Resize to 256x256 (same as target_size=IMG_SIZE in notebook)
     img = cv2.resize(img, (256, 256))
     
-    # Convert to RGB if grayscale
+    # Convert to RGB if grayscale (ImageDataGenerator loads as RGB)
     if len(img.shape) == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
     elif len(img.shape) == 3 and img.shape[2] == 4:  # RGBA
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+    elif len(img.shape) == 3 and img.shape[2] == 3:
+        # OpenCV loads as BGR, convert to RGB to match ImageDataGenerator
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     
-    # Optional CLAHE enhancement (disabled by default to match training)
-    if use_clahe:
-        lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        lab[:, :, 0] = clahe.apply(lab[:, :, 0])
-        img = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+    # Normalize to [0, 1] - EXACT same as train_datagen = ImageDataGenerator(rescale=1./255.)
+    img_norm = img.astype(np.float32) / 255.0
     
-    # Normalize to [0, 1] - EXACT same preprocessing as training
-    img_norm = img * 1.0 / 255.0
-    
-    # Convert to float64
-    img_norm = np.array(img_norm, dtype=np.float64)
-    
-    # Reshape for model input
+    # Reshape for model input (batch_size=1, height=256, width=256, channels=3)
     img_norm = np.reshape(img_norm, (1, 256, 256, 3))
     
     return img_norm
@@ -227,26 +234,32 @@ def preprocess_image_classification(img, use_clahe=False):
 
 def preprocess_image_segmentation(img):
     """
-    Preprocessing for segmentation model - matches original training preprocessing.
+    Preprocessing for segmentation model - EXACTLY matches notebook's DataGenerator.
+    Uses standardization: img -= img.mean(); img /= img.std() as in utilities.py DataGenerator.
     """
-    # Resize to 256x256
+    # Resize to 256x256 (same as img_h, img_w in DataGenerator)
     img = cv2.resize(img, (256, 256))
     
-    # Convert to RGB if grayscale
+    # Convert to RGB if grayscale (DataGenerator reads with PIL which loads as RGB)
     if len(img.shape) == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
     elif len(img.shape) == 3 and img.shape[2] == 4:  # RGBA
         img = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+    elif len(img.shape) == 3 and img.shape[2] == 3:
+        # OpenCV loads as BGR, convert to RGB to match PIL in DataGenerator
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     
-    # Convert to float64
+    # Convert to float64 - EXACT same as DataGenerator
     img = np.array(img, dtype=np.float64)
     
-    # Standardize (mean centering and std scaling) - EXACT same as training
+    # Standardize (mean centering and std scaling) - EXACT same as DataGenerator:
+    # img -= img.mean()
+    # img /= (img.std() + 1e-8)
     img -= img.mean()
     img /= (img.std() + 1e-8)
     
-    # Reshape for model input
-    X = np.empty((1, 256, 256, 3))
+    # Reshape for model input - EXACT same as DataGenerator: X = np.empty((1, 256, 256, 3))
+    X = np.empty((1, 256, 256, 3), dtype=np.float64)
     X[0,] = img
     
     return X
@@ -256,29 +269,32 @@ def ensemble_classification_predict(img, use_tta=True):
     """
     Ensemble prediction combining multiple classification models.
     Uses weighted averaging based on model reliability.
+    Primary ResNet-50 model gets higher weight as it matches notebook training.
     """
     predictions = []
     weights = []
     
     for name, model in classification_models:
         if use_tta and app.config['USE_TTA']:
-            # Use Test Time Augmentation
+            # Use Test Time Augmentation for more robust predictions
             pred = predict_with_tta_classification(model, img)
         else:
             pred = model.predict(img, verbose=0)
         predictions.append(pred)
         
-        # Assign weights (primary model gets higher weight)
+        # Assign weights (primary model trained in notebook gets highest weight)
         if name == 'ResNet-50':
-            weights.append(1.0)  # Primary model - full weight
+            weights.append(1.0)  # Primary model from notebook - full weight
+        elif name == 'Classifier-ResNet':
+            weights.append(0.8)  # Secondary trained model - high weight
         else:
-            weights.append(0.5)  # Secondary model - lower weight
+            weights.append(0.5)  # Other models - lower weight
     
     # Normalize weights
     weights = np.array(weights)
     weights = weights / weights.sum()
     
-    # Weighted ensemble prediction
+    # Weighted ensemble prediction for better accuracy
     if len(predictions) > 1 and app.config['USE_ENSEMBLE']:
         ensemble_pred = np.zeros_like(predictions[0])
         for pred, weight in zip(predictions, weights):
@@ -358,9 +374,10 @@ def predict_tumor(image_path):
     # ============================================================
     # STAGE 1: ENHANCED CLASSIFICATION (Ensemble + TTA)
     # ============================================================
+    # Preprocess EXACTLY like notebook's ImageDataGenerator (rescale=1./255.)
     img_class = preprocess_image_classification(img_original.copy())
     
-    # Use ensemble prediction with TTA
+    # Use ensemble prediction with TTA for robust tumor detection
     classification_pred = ensemble_classification_predict(img_class, use_tta=app.config['USE_TTA'])
     
     # Determine tumor presence with confidence
