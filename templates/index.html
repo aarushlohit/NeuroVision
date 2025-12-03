@@ -34,7 +34,7 @@
                     <li><a href="#home" class="nav-link active">Home</a></li>
                     <li><a href="#about" class="nav-link">About</a></li>
                     <li><a href="#features" class="nav-link">Features</a></li>
-                    <li><a href="/scan" class="nav-link">Scan</a></li>
+                    <li><a href="#scan" class="nav-link">Scan</a></li>
                     <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
                     <li><a href="#architecture" class="nav-link">Architecture</a></li>
                     <li><a href="#stats" class="nav-link">Stats</a></li>
@@ -1039,6 +1039,150 @@
                         <i class="fas fa-arrow-right"></i>
                         <div class="button-shine"></div>
                     </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scan Section -->
+    <section id="scan" class="scan-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">AI Analysis</span>
+                <h2 class="section-title">Upload MRI Scan</h2>
+                <p class="section-description">
+                    Upload a brain MRI scan to detect tumors and visualize their location instantly.
+                </p>
+            </div>
+
+            <div class="scan-container">
+                <!-- Upload Area -->
+                <div class="upload-card" id="uploadCard">
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept="image/*,.tif,.tiff" hidden>
+                        <div class="upload-content">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h3 class="upload-title">Drop MRI scan here</h3>
+                            <p class="upload-text">or click to browse</p>
+                            <p class="upload-formats">Supported: JPG, PNG, TIF, TIFF</p>
+                        </div>
+                    </div>
+                    
+                    <div class="image-preview" id="imagePreview" style="display: none;">
+                        <img id="previewImage" src="" alt="Preview">
+                        <button class="remove-btn" id="removeBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-analyze" id="analyzeBtn" disabled>
+                        <i class="fas fa-search"></i>
+                        Analyze Scan
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-card" id="loadingCard" style="display: none;">
+                    <!-- Doctor Review Section -->
+                    <div class="doctor-review-section">
+                        <div class="doctor-container">
+                            <div class="doctor-avatar">
+                                <div class="doctor-image">
+                                    <i class="fas fa-user-md"></i>
+                                </div>
+                                <div class="doctor-pulse"></div>
+                                <div class="doctor-status-dot"></div>
+                            </div>
+                            <div class="doctor-info">
+                                <span class="doctor-name">Dr. Sarah Mitchell</span>
+                                <span class="doctor-title">Senior Neuroradiologist</span>
+                                <div class="doctor-credentials">
+                                    <span class="credential"><i class="fas fa-award"></i> Board Certified</span>
+                                    <span class="credential"><i class="fas fa-brain"></i> 15+ Years Experience</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="scan-review-area">
+                            <div class="scan-preview-container" id="scanPreviewContainer">
+                                <img id="doctorScanPreview" src="" alt="MRI Scan under review">
+                                <div class="scan-overlay">
+                                    <div class="scan-line"></div>
+                                </div>
+                                <div class="magnifier" id="magnifier">
+                                    <i class="fas fa-search-plus"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="doctor-actions">
+                                <div class="action-item active" id="action1">
+                                    <div class="action-icon">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <span>Examining scan quality</span>
+                                </div>
+                                <div class="action-item" id="action2">
+                                    <div class="action-icon">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <span>Checking brain regions</span>
+                                </div>
+                                <div class="action-item" id="action3">
+                                    <div class="action-icon">
+                                        <i class="fas fa-microscope"></i>
+                                    </div>
+                                    <span>Analyzing tissue patterns</span>
+                                </div>
+                                <div class="action-item" id="action4">
+                                    <div class="action-icon">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </div>
+                                    <span>Preparing diagnosis</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="doctor-thought-bubble" id="thoughtBubble">
+                            <div class="thought-content">
+                                <i class="fas fa-quote-left"></i>
+                                <p id="doctorThought">Let me carefully examine this MRI scan...</p>
+                            </div>
+                            <div class="thought-typing">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-divider">
+                        <span>AI-Assisted Analysis</span>
+                    </div>
+                    
+                    <h3 class="loading-title">Analyzing MRI Scan...</h3>
+                    <p class="loading-text">Our AI is processing your image with expert oversight</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="loading-steps">
+                        <div class="step-item active" id="step1">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Image Uploaded</span>
+                        </div>
+                        <div class="step-item" id="step2">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Classification</span>
+                        </div>
+                        <div class="step-item" id="step3">
+                            <i class="fas fa-clock"></i>
+                            <span>Segmentation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Area -->
+                <div class="results-container" id="resultsContainer" style="display: none;">
+                    <!-- Results will be dynamically inserted here -->
                 </div>
             </div>
         </div>
@@ -2450,6 +2594,803 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ====================================== -->
+            <!-- RESUNET DEEP DIVE SECTION -->
+            <!-- ====================================== -->
+            <div class="model-deep-dive resunet-deep-dive">
+                <div class="model-header-v2">
+                    <div class="model-icon-container resunet">
+                        <div class="icon-rings">
+                            <div class="ring r1"></div>
+                            <div class="ring r2"></div>
+                            <div class="ring r3"></div>
+                        </div>
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <div class="model-title-group">
+                        <div class="model-badge-v2 resunet">
+                            <span class="badge-icon"><i class="fas fa-certificate"></i></span>
+                            <span>Stage 2: Segmentation Model</span>
+                        </div>
+                        <h3 class="model-name">ResUNet</h3>
+                        <p class="model-tagline">Residual U-Net for Pixel-Level Tumor Boundary Detection</p>
+                    </div>
+                    <div class="model-quick-metrics">
+                        <div class="metric-card">
+                            <div class="metric-value">23</div>
+                            <div class="metric-label">Layers</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">1.2M</div>
+                            <div class="metric-label">Parameters</div>
+                        </div>
+                        <div class="metric-card highlight teal">
+                            <div class="metric-value">92%</div>
+                            <div class="metric-label">Tversky</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value">~0.8s</div>
+                            <div class="metric-label">Inference</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Purpose Card -->
+                <div class="purpose-card teal">
+                    <div class="purpose-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <div class="purpose-content">
+                        <h4>Model Purpose</h4>
+                        <p>
+                            <strong>Semantic Segmentation</strong> to precisely locate and delineate tumor boundaries at pixel level.
+                            ResUNet combines the powerful <strong>U-Net encoder-decoder architecture</strong> with 
+                            <strong>residual connections</strong>, enabling precise localization while maintaining spatial context 
+                            through skip connections that bridge the encoder and decoder paths.
+                        </p>
+                    </div>
+                    <div class="purpose-visual">
+                        <div class="segmentation-demo">
+                            <div class="seg-input-output">
+                                <div class="seg-demo-item input">
+                                    <div class="seg-demo-icon">
+                                        <i class="fas fa-brain"></i>
+                                    </div>
+                                    <span>Input MRI</span>
+                                </div>
+                                <div class="seg-demo-arrow">
+                                    <i class="fas fa-long-arrow-alt-right"></i>
+                                </div>
+                                <div class="seg-demo-item output">
+                                    <div class="seg-demo-icon with-mask">
+                                        <i class="fas fa-brain"></i>
+                                        <div class="tumor-mask-overlay"></div>
+                                    </div>
+                                    <span>Tumor Mask</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive U-Net Architecture Visualization - Redesigned -->
+                <div class="interactive-arch-flow">
+                    <div class="arch-flow-header">
+                        <h4><i class="fas fa-project-diagram"></i> U-Net Architecture Data Flow</h4>
+                        <p>The iconic U-shaped architecture with Skip Connections for precise pixel-level segmentation</p>
+                    </div>
+
+                    <div class="unet-architecture-visual-v2">
+                        <!-- Input Section -->
+                        <div class="unet-input-section">
+                            <div class="unet-input-node">
+                                <div class="input-icon-wrap">
+                                    <i class="fas fa-file-medical"></i>
+                                </div>
+                                <div class="input-details">
+                                    <span class="input-title">Input MRI</span>
+                                    <span class="input-dims">256×256×3</span>
+                                </div>
+                            </div>
+                            <div class="flow-connector vertical">
+                                <div class="connector-line"></div>
+                                <div class="connector-arrow"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                        </div>
+
+                        <!-- U-Shape Container -->
+                        <div class="unet-ushape-container">
+                            <!-- Left Column - Encoder -->
+                            <div class="unet-column encoder-column">
+                                <div class="column-header encoder-header">
+                                    <div class="header-icon"><i class="fas fa-compress-alt"></i></div>
+                                    <div class="header-text">
+                                        <h5>Encoder</h5>
+                                        <span>Contracting Path</span>
+                                    </div>
+                                </div>
+
+                                <!-- Encoder Block 1 -->
+                                <div class="unet-block encoder-block-v2 level-1" data-level="1">
+                                    <div class="block-visual">
+                                        <div class="block-bar" style="height: 100%;"></div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div class="block-top">
+                                            <span class="level-badge">E1</span>
+                                            <span class="dims-badge">256×256×64</span>
+                                        </div>
+                                        <div class="operations-stack">
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                            <div class="op-chip bn"><span>BN+ReLU</span></div>
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="skip-connector skip-1">
+                                        <div class="skip-line"></div>
+                                        <div class="skip-label">Skip 1</div>
+                                    </div>
+                                </div>
+
+                                <div class="pool-indicator">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>MaxPool 2×2</span>
+                                </div>
+
+                                <!-- Encoder Block 2 -->
+                                <div class="unet-block encoder-block-v2 level-2" data-level="2">
+                                    <div class="block-visual">
+                                        <div class="block-bar" style="height: 85%;"></div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div class="block-top">
+                                            <span class="level-badge">E2</span>
+                                            <span class="dims-badge">128×128×128</span>
+                                        </div>
+                                        <div class="operations-stack">
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                            <div class="op-chip residual"><span>+Residual</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="skip-connector skip-2">
+                                        <div class="skip-line"></div>
+                                        <div class="skip-label">Skip 2</div>
+                                    </div>
+                                </div>
+
+                                <div class="pool-indicator">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>MaxPool 2×2</span>
+                                </div>
+
+                                <!-- Encoder Block 3 -->
+                                <div class="unet-block encoder-block-v2 level-3" data-level="3">
+                                    <div class="block-visual">
+                                        <div class="block-bar" style="height: 70%;"></div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div class="block-top">
+                                            <span class="level-badge">E3</span>
+                                            <span class="dims-badge">64×64×256</span>
+                                        </div>
+                                        <div class="operations-stack">
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                            <div class="op-chip residual"><span>+Residual</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="skip-connector skip-3">
+                                        <div class="skip-line"></div>
+                                        <div class="skip-label">Skip 3</div>
+                                    </div>
+                                </div>
+
+                                <div class="pool-indicator">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>MaxPool 2×2</span>
+                                </div>
+
+                                <!-- Encoder Block 4 -->
+                                <div class="unet-block encoder-block-v2 level-4" data-level="4">
+                                    <div class="block-visual">
+                                        <div class="block-bar" style="height: 55%;"></div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div class="block-top">
+                                            <span class="level-badge">E4</span>
+                                            <span class="dims-badge">32×32×512</span>
+                                        </div>
+                                        <div class="operations-stack">
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                            <div class="op-chip residual"><span>+Residual</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="skip-connector skip-4">
+                                        <div class="skip-line"></div>
+                                        <div class="skip-label">Skip 4</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Center Column - Bridge/Bottleneck -->
+                            <div class="unet-column bridge-column">
+                                <div class="bridge-connector-top">
+                                    <div class="connector-curve left"></div>
+                                </div>
+                                
+                                <div class="bottleneck-block">
+                                    <div class="bottleneck-glow"></div>
+                                    <div class="bottleneck-header">
+                                        <i class="fas fa-compress-arrows-alt"></i>
+                                        <span>Bottleneck</span>
+                                    </div>
+                                    <div class="bottleneck-dims">16×16×1024</div>
+                                    <div class="bottleneck-ops">
+                                        <div class="op-mini">Conv 3×3</div>
+                                        <div class="op-mini">BN + ReLU</div>
+                                        <div class="op-mini">Conv 3×3</div>
+                                        <div class="op-mini">+ Residual</div>
+                                    </div>
+                                    <div class="bottleneck-badge">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span>Maximum Compression</span>
+                                    </div>
+                                </div>
+
+                                <div class="bridge-connector-bottom">
+                                    <div class="connector-curve right"></div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column - Decoder -->
+                            <div class="unet-column decoder-column">
+                                <div class="column-header decoder-header">
+                                    <div class="header-icon"><i class="fas fa-expand-alt"></i></div>
+                                    <div class="header-text">
+                                        <h5>Decoder</h5>
+                                        <span>Expanding Path</span>
+                                    </div>
+                                </div>
+
+                                <!-- Decoder Block 4 -->
+                                <div class="unet-block decoder-block-v2 level-4" data-level="4">
+                                    <div class="skip-receiver skip-recv-4">
+                                        <div class="skip-plus"><i class="fas fa-plus"></i></div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div class="block-top">
+                                            <span class="level-badge dec">D4</span>
+                                            <span class="dims-badge">32×32×512</span>
+                                        </div>
+                                        <div class="operations-stack">
+                                            <div class="op-chip upsample"><span>UpConv 2×2</span></div>
+                                            <div class="op-chip concat"><span>Concat</span></div>
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="block-visual decoder-visual">
+                                        <div class="block-bar" style="height: 55%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="upsample-indicator">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>UpSample 2×</span>
+                                </div>
+
+                                <!-- Decoder Block 3 -->
+                                <div class="unet-block decoder-block-v2 level-3" data-level="3">
+                                    <div class="skip-receiver skip-recv-3">
+                                        <div class="skip-plus"><i class="fas fa-plus"></i></div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div class="block-top">
+                                            <span class="level-badge dec">D3</span>
+                                            <span class="dims-badge">64×64×256</span>
+                                        </div>
+                                        <div class="operations-stack">
+                                            <div class="op-chip upsample"><span>UpConv 2×2</span></div>
+                                            <div class="op-chip concat"><span>Concat</span></div>
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="block-visual decoder-visual">
+                                        <div class="block-bar" style="height: 70%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="upsample-indicator">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>UpSample 2×</span>
+                                </div>
+
+                                <!-- Decoder Block 2 -->
+                                <div class="unet-block decoder-block-v2 level-2" data-level="2">
+                                    <div class="skip-receiver skip-recv-2">
+                                        <div class="skip-plus"><i class="fas fa-plus"></i></div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div class="block-top">
+                                            <span class="level-badge dec">D2</span>
+                                            <span class="dims-badge">128×128×128</span>
+                                        </div>
+                                        <div class="operations-stack">
+                                            <div class="op-chip upsample"><span>UpConv 2×2</span></div>
+                                            <div class="op-chip concat"><span>Concat</span></div>
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="block-visual decoder-visual">
+                                        <div class="block-bar" style="height: 85%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="upsample-indicator">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>UpSample 2×</span>
+                                </div>
+
+                                <!-- Decoder Block 1 -->
+                                <div class="unet-block decoder-block-v2 level-1 final" data-level="1">
+                                    <div class="skip-receiver skip-recv-1">
+                                        <div class="skip-plus"><i class="fas fa-plus"></i></div>
+                                    </div>
+                                    <div class="block-content">
+                                        <div class="block-top">
+                                            <span class="level-badge dec final">D1</span>
+                                            <span class="dims-badge">256×256×64</span>
+                                        </div>
+                                        <div class="operations-stack">
+                                            <div class="op-chip upsample"><span>UpConv 2×2</span></div>
+                                            <div class="op-chip concat"><span>Concat</span></div>
+                                            <div class="op-chip conv"><span>Conv 3×3</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="block-visual decoder-visual">
+                                        <div class="block-bar" style="height: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SVG Skip Connections -->
+                            <svg class="skip-connections-svg" viewBox="0 0 800 600" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="skipGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#0d9488;stop-opacity:0.6" />
+                                        <stop offset="50%" style="stop-color:#14b8a6;stop-opacity:0.8" />
+                                        <stop offset="100%" style="stop-color:#0d9488;stop-opacity:0.6" />
+                                    </linearGradient>
+                                    <filter id="skipGlow">
+                                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                        <feMerge>
+                                            <feMergeNode in="coloredBlur"/>
+                                            <feMergeNode in="SourceGraphic"/>
+                                        </feMerge>
+                                    </filter>
+                                    <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                                        <polygon points="0 0, 6 3, 0 6" fill="#14b8a6" />
+                                    </marker>
+                                </defs>
+                                <!-- Skip connection paths drawn by CSS positioning -->
+                            </svg>
+                        </div>
+
+                        <!-- Output Section -->
+                        <div class="unet-output-section">
+                            <div class="flow-connector vertical up">
+                                <div class="connector-arrow"><i class="fas fa-chevron-down"></i></div>
+                                <div class="connector-line"></div>
+                            </div>
+                            <div class="final-conv-layer">
+                                <span>Conv 1×1 + Sigmoid</span>
+                            </div>
+                            <div class="unet-output-node">
+                                <div class="output-icon-wrap">
+                                    <div class="output-brain-visual">
+                                        <i class="fas fa-brain"></i>
+                                        <div class="tumor-highlight pulse"></div>
+                                    </div>
+                                </div>
+                                <div class="output-details">
+                                    <span class="output-title">Segmentation Mask</span>
+                                    <span class="output-dims">256×256×1</span>
+                                </div>
+                                <div class="output-description">
+                                    <span>Pixel-wise tumor probability map</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Visual Legend -->
+                        <div class="unet-legend-v2">
+                            <div class="legend-title">
+                                <i class="fas fa-palette"></i>
+                                <span>Architecture Legend</span>
+                            </div>
+                            <div class="legend-items-grid">
+                                <div class="legend-item-v2">
+                                    <div class="legend-color-v2 encoder-color"></div>
+                                    <span>Encoder Block</span>
+                                </div>
+                                <div class="legend-item-v2">
+                                    <div class="legend-color-v2 decoder-color"></div>
+                                    <span>Decoder Block</span>
+                                </div>
+                                <div class="legend-item-v2">
+                                    <div class="legend-color-v2 bottleneck-color"></div>
+                                    <span>Bottleneck</span>
+                                </div>
+                                <div class="legend-item-v2">
+                                    <div class="legend-color-v2 skip-color-v2"></div>
+                                    <span>Skip Connection</span>
+                                </div>
+                                <div class="legend-item-v2">
+                                    <div class="legend-color-v2 conv-color-v2"></div>
+                                    <span>Convolution</span>
+                                </div>
+                                <div class="legend-item-v2">
+                                    <div class="legend-color-v2 residual-color-v2"></div>
+                                    <span>Residual</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Details Grid for ResUNet -->
+                <div class="tech-details-grid">
+                    <div class="tech-card components-card teal">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-cube"></i></div>
+                            <h4>Key Components Explained</h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="component-item">
+                                <div class="component-icon"><i class="fas fa-compress-alt"></i></div>
+                                <div class="component-info">
+                                    <h5>Encoder Path (Contracting)</h5>
+                                    <p>Progressive downsampling captures context and "what" is in the image. Each level doubles feature channels while halving spatial dimensions.</p>
+                                </div>
+                            </div>
+                            <div class="component-item">
+                                <div class="component-icon"><i class="fas fa-expand-alt"></i></div>
+                                <div class="component-info">
+                                    <h5>Decoder Path (Expanding)</h5>
+                                    <p>Progressive upsampling recovers spatial resolution and "where" objects are located. Reconstructs the segmentation mask at full resolution.</p>
+                                </div>
+                            </div>
+                            <div class="component-item">
+                                <div class="component-icon"><i class="fas fa-link"></i></div>
+                                <div class="component-info">
+                                    <h5>Skip Connections (Concatenation)</h5>
+                                    <p>Bridge encoder and decoder at each level. Preserves fine-grained spatial details that would otherwise be lost during downsampling.</p>
+                                </div>
+                            </div>
+                            <div class="component-item">
+                                <div class="component-icon"><i class="fas fa-redo"></i></div>
+                                <div class="component-info">
+                                    <h5>Residual Blocks</h5>
+                                    <p>Enable training of deeper networks by allowing gradients to flow directly. Improves convergence and final segmentation accuracy.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tech-card config-card teal">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-cog"></i></div>
+                            <h4>Technical Configuration</h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="config-grid">
+                                <div class="config-item">
+                                    <span class="config-label">Input Dimensions</span>
+                                    <span class="config-value">256 × 256 × 3 RGB</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Output Dimensions</span>
+                                    <span class="config-value">256 × 256 × 1 Mask</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Loss Function</span>
+                                    <span class="config-value">Focal Tversky Loss (α=0.7, β=0.3)</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Optimizer</span>
+                                    <span class="config-value">Adam (lr=0.05, ε=0.1)</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Activation (Output)</span>
+                                    <span class="config-value">Sigmoid</span>
+                                </div>
+                                <div class="config-item">
+                                    <span class="config-label">Skip Connections</span>
+                                    <span class="config-value">4 levels (Concatenation)</span>
+                                </div>
+                            </div>
+                            <div class="output-metrics">
+                                <h5><i class="fas fa-chart-area"></i> Segmentation Metrics</h5>
+                                <div class="output-items">
+                                    <div class="output-item">
+                                        <i class="fas fa-bullseye"></i>
+                                        <span>92% Tversky Index</span>
+                                    </div>
+                                    <div class="output-item">
+                                        <i class="fas fa-dice"></i>
+                                        <span>0.91 Dice Score</span>
+                                    </div>
+                                    <div class="output-item">
+                                        <i class="fas fa-percentage"></i>
+                                        <span>Tumor Area %</span>
+                                    </div>
+                                    <div class="output-item">
+                                        <i class="fas fa-th"></i>
+                                        <span>Pixel Count</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Why Focal Tversky Loss - Special Section -->
+                <div class="special-info-card">
+                    <div class="info-card-header">
+                        <div class="info-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="info-title">
+                            <h4>Why Focal Tversky Loss?</h4>
+                            <p>Handling Class Imbalance in Medical Imaging</p>
+                        </div>
+                    </div>
+                    <div class="info-card-content">
+                        <div class="info-columns">
+                            <div class="info-column">
+                                <div class="challenge-box">
+                                    <div class="box-header">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span>The Challenge</span>
+                                    </div>
+                                    <p>Brain tumor regions typically occupy only <strong>2-10%</strong> of the total image area. Standard loss functions like Binary Cross-Entropy would be dominated by the large background class.</p>
+                                </div>
+                            </div>
+                            <div class="info-column">
+                                <div class="solution-box">
+                                    <div class="box-header">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>The Solution</span>
+                                    </div>
+                                    <p>Focal Tversky Loss with <strong>α=0.7, β=0.3</strong> penalizes false negatives more heavily, ensuring the model doesn't miss small tumors while maintaining precision.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="formula-display">
+                            <div class="formula-label">Tversky Index Formula:</div>
+                            <div class="formula-math">
+                                TI = TP / (TP + α·FN + β·FP)
+                            </div>
+                            <div class="formula-note">
+                                <span>Where: TP = True Positives, FN = False Negatives, FP = False Positives</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layer Breakdown for ResUNet -->
+                <div class="layer-breakdown-v2 resunet-breakdown">
+                    <div class="breakdown-header">
+                        <h4><i class="fas fa-sitemap"></i> Complete Architecture Breakdown</h4>
+                        <span class="layer-count">Encoder → Bridge → Decoder Structure</span>
+                    </div>
+                    <div class="breakdown-accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header encoder-header">
+                                <div class="stage-indicator enc">Encoder</div>
+                                <div class="stage-name">Contracting Path</div>
+                                <div class="stage-summary">4 levels • 64→512 filters</div>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="layer-list">
+                                    <div class="layer-row block-header">
+                                        <span>Level 1 (256×256)</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">Conv2D 3×3 × 2</span>
+                                        <span class="layer-params">64 filters + BN + ReLU</span>
+                                        <span class="layer-output">256×256×64</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">MaxPool 2×2</span>
+                                        <span class="layer-params">stride=2</span>
+                                        <span class="layer-output">128×128×64</span>
+                                    </div>
+                                    <div class="layer-row block-header">
+                                        <span>Level 2 (128×128)</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">ResBlock</span>
+                                        <span class="layer-params">128 filters + Skip</span>
+                                        <span class="layer-output">128×128×128</span>
+                                    </div>
+                                    <div class="layer-row block-header">
+                                        <span>Level 3 (64×64)</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">ResBlock</span>
+                                        <span class="layer-params">256 filters + Skip</span>
+                                        <span class="layer-output">64×64×256</span>
+                                    </div>
+                                    <div class="layer-row block-header">
+                                        <span>Level 4 (32×32)</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">ResBlock</span>
+                                        <span class="layer-params">512 filters + Skip</span>
+                                        <span class="layer-output">32×32×512</span>
+                                    </div>
+                                </div>
+                                <div class="block-output teal">Output: 4 Skip Connections stored for decoder</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item highlighted teal-highlight">
+                            <div class="accordion-header bridge-header">
+                                <div class="stage-indicator bridge">Bridge</div>
+                                <div class="stage-name">Bottleneck <span class="star">⭐ Key</span></div>
+                                <div class="stage-summary">16×16 • 1024 filters</div>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="layer-list">
+                                    <div class="layer-row">
+                                        <span class="layer-type">Conv2D 3×3</span>
+                                        <span class="layer-params">1024 filters</span>
+                                        <span class="layer-output">16×16×1024</span>
+                                    </div>
+                                    <div class="layer-row">
+                                        <span class="layer-type">BatchNorm + ReLU</span>
+                                        <span class="layer-params">Normalization</span>
+                                        <span class="layer-output">16×16×1024</span>
+                                    </div>
+                                    <div class="layer-row">
+                                        <span class="layer-type">Conv2D 3×3</span>
+                                        <span class="layer-params">1024 filters</span>
+                                        <span class="layer-output">16×16×1024</span>
+                                    </div>
+                                    <div class="layer-row">
+                                        <span class="layer-type">Residual Add</span>
+                                        <span class="layer-params">+ Input</span>
+                                        <span class="layer-output">16×16×1024</span>
+                                    </div>
+                                    <div class="layer-row info teal-info">
+                                        <span>The bridge captures the most abstract, high-level features. Maximum compression of spatial information while preserving semantic content.</span>
+                                    </div>
+                                </div>
+                                <div class="block-output teal">Output: 16×16×1024 → Decoder Input</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header decoder-header">
+                                <div class="stage-indicator dec">Decoder</div>
+                                <div class="stage-name">Expanding Path</div>
+                                <div class="stage-summary">4 levels • 512→64 filters</div>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="layer-list">
+                                    <div class="layer-row block-header">
+                                        <span>Level 4 (32×32) + Skip Connection</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">UpConv 2×2</span>
+                                        <span class="layer-params">512 filters, stride=2</span>
+                                        <span class="layer-output">32×32×512</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">Concatenate</span>
+                                        <span class="layer-params">+ Encoder Skip 4</span>
+                                        <span class="layer-output">32×32×1024</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">ResBlock</span>
+                                        <span class="layer-params">512 filters</span>
+                                        <span class="layer-output">32×32×512</span>
+                                    </div>
+                                    <div class="layer-row block-header">
+                                        <span>Level 3 → Level 2 → Level 1 (Same pattern)</span>
+                                    </div>
+                                    <div class="layer-row sub">
+                                        <span class="layer-type">UpConv + Concat + Conv</span>
+                                        <span class="layer-params">Progressive upsampling</span>
+                                        <span class="layer-output">256×256×64</span>
+                                    </div>
+                                </div>
+                                <div class="block-output teal">Output: Full resolution feature maps</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <div class="accordion-header output-header">
+                                <div class="stage-indicator out">Output</div>
+                                <div class="stage-name">Segmentation Head</div>
+                                <div class="stage-summary">256×256 • 1 channel</div>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="layer-list">
+                                    <div class="layer-row">
+                                        <span class="layer-type">Conv2D 1×1</span>
+                                        <span class="layer-params">1 filter</span>
+                                        <span class="layer-output">256×256×1</span>
+                                    </div>
+                                    <div class="layer-row">
+                                        <span class="layer-type">Sigmoid Activation</span>
+                                        <span class="layer-params">Probability [0-1]</span>
+                                        <span class="layer-output">256×256×1</span>
+                                    </div>
+                                    <div class="layer-row">
+                                        <span class="layer-type">Threshold (0.5)</span>
+                                        <span class="layer-params">Binary mask</span>
+                                        <span class="layer-output">256×256×1</span>
+                                    </div>
+                                </div>
+                                <div class="block-output teal">Final Output: Binary tumor segmentation mask</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Visualization -->
+                <div class="output-visualization-card">
+                    <div class="output-viz-header">
+                        <h4><i class="fas fa-eye"></i> Segmentation Output Pipeline</h4>
+                        <p>From probability map to visual overlay</p>
+                    </div>
+                    <div class="output-viz-flow">
+                        <div class="viz-step">
+                            <div class="viz-icon input-img">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="viz-label">Original MRI</div>
+                            <div class="viz-dims">256×256×3</div>
+                        </div>
+                        <div class="viz-arrow">
+                            <i class="fas fa-long-arrow-alt-right"></i>
+                        </div>
+                        <div class="viz-step">
+                            <div class="viz-icon prob-map">
+                                <div class="heatmap-demo"></div>
+                            </div>
+                            <div class="viz-label">Probability Map</div>
+                            <div class="viz-dims">[0.0 - 1.0]</div>
+                        </div>
+                        <div class="viz-arrow">
+                            <i class="fas fa-long-arrow-alt-right"></i>
+                            <span>Threshold 0.5</span>
+                        </div>
+                        <div class="viz-step">
+                            <div class="viz-icon binary-mask">
+                                <div class="mask-demo"></div>
+                            </div>
+                            <div class="viz-label">Binary Mask</div>
+                            <div class="viz-dims">0 or 1</div>
+                        </div>
+                        <div class="viz-arrow">
+                            <i class="fas fa-long-arrow-alt-right"></i>
+                            <span>Overlay</span>
+                        </div>
+                        <div class="viz-step final">
+                            <div class="viz-icon overlay-result">
+                                <i class="fas fa-brain"></i>
+                                <div class="tumor-overlay-demo"></div>
+                            </div>
+                            <div class="viz-label">Final Result</div>
+                            <div class="viz-dims">Visual Diagnosis</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -2504,23 +3445,36 @@
         </div>
     </section>
 
-    <!-- Footer - Minimal with Scan CTA -->
-    <footer class="footer footer-minimal-home">
+    <!-- Footer -->
+    <footer class="footer">
         <div class="container">
-            <div class="footer-scan-cta">
-                <a href="/scan" class="footer-scan-btn">
-                    <span class="btn-icon"><i class="fas fa-brain"></i></span>
-                    <span class="btn-text">
-                        <strong>Start Brain Scan Analysis</strong>
-                        <small>Upload your MRI and get instant AI results</small>
-                    </span>
-                    <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
-                </a>
-            </div>
-            <div class="footer-bottom-minimal">
-                <span>&copy; 2024 NeuroScan AI</span>
-                <span class="separator">•</span>
-                <span>For Research & Educational Purposes Only</span>
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NeuroScan AI" class="footer-logo-icon">
+                    <span>NeuroScan<span class="ai-badge">AI</span></span>
+                </div>
+                <p class="footer-text">
+                    Advanced AI-powered brain tumor detection using deep learning technology.
+                    Built for healthcare professionals and researchers.
+                </p>
+                <div class="footer-disclaimer">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>For research and educational purposes only. Not for clinical diagnosis.</span>
+                </div>
+                <div class="footer-tech">
+                    <span class="tech-badge">ResNet-50</span>
+                    <span class="tech-badge">ResUNet</span>
+                    <span class="tech-badge">TensorFlow</span>
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">Flask</span>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 NeuroScan AI. Hackathon Project.</p>
+                    <div class="footer-links">
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fas fa-file-alt"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
