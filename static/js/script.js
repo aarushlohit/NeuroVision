@@ -17,25 +17,32 @@ const elements = {
     removeBtn: document.getElementById('removeBtn'),
     analyzeBtn: document.getElementById('analyzeBtn'),
     
-    // Card states
+    // Card states (V2 - new design)
     uploadCard: document.getElementById('uploadCard'),
     loadingCard: document.getElementById('loadingCard'),
     resultsContainer: document.getElementById('resultsContainer'),
     
-    // Loading elements
+    // Loading elements (V2)
     progressFill: document.getElementById('progressFill'),
-    step1: document.getElementById('step1'),
-    step2: document.getElementById('step2'),
-    step3: document.getElementById('step3'),
+    progressPercent: document.getElementById('progressPercent'),
     
-    // Doctor review elements
+    // Consultation progress container
+    consultationProgress: document.getElementById('consultationProgress'),
+    
+    // Doctor review elements (V2)
     doctorScanPreview: document.getElementById('doctorScanPreview'),
     thoughtBubble: document.getElementById('thoughtBubble'),
     doctorThought: document.getElementById('doctorThought'),
-    action1: document.getElementById('action1'),
-    action2: document.getElementById('action2'),
-    action3: document.getElementById('action3'),
-    action4: document.getElementById('action4'),
+    
+    // Analysis checklist items
+    checkItem1: document.getElementById('checkItem1'),
+    checkItem2: document.getElementById('checkItem2'),
+    checkItem3: document.getElementById('checkItem3'),
+    checkItem4: document.getElementById('checkItem4'),
+    
+    // AI model indicators
+    aiModel1: document.getElementById('aiModel1'),
+    aiModel2: document.getElementById('aiModel2'),
     
     // Navigation
     navLinks: document.querySelectorAll('.nav-link'),
@@ -58,8 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeEventListeners();
     initializeAnimations();
     initializeAccordion();
+    initializeConsultationProgress();
     checkAPIHealth();
 });
+
+// Initialize consultation progress on page load
+function initializeConsultationProgress() {
+    // Start at step 1 (Check-In)
+    updateConsultationProgress(1);
+}
 
 // ==================== Accordion Functionality ====================
 function initializeAccordion() {
@@ -217,6 +231,9 @@ function previewImage(file) {
         
         // Animate preview
         elements.imagePreview.classList.add('fade-in');
+        
+        // Update progress to step 2 (Upload Scan - completed uploading)
+        updateConsultationProgress(2);
     };
     
     reader.readAsDataURL(file);
@@ -231,6 +248,9 @@ function handleRemoveImage(e) {
     elements.uploadArea.style.display = 'block';
     elements.imagePreview.style.display = 'none';
     elements.analyzeBtn.disabled = true;
+    
+    // Reset progress back to step 1 (Check-In)
+    updateConsultationProgress(1);
 }
 
 // ==================== Analysis ====================
@@ -279,6 +299,9 @@ function showLoadingState() {
     elements.loadingCard.style.display = 'block';
     elements.resultsContainer.style.display = 'none';
     
+    // Update consultation progress - move to step 3 (Doctor Review)
+    updateConsultationProgress(3);
+    
     // Set the doctor's scan preview to the uploaded image
     if (uploadedFile && elements.doctorScanPreview) {
         const reader = new FileReader();
@@ -295,18 +318,30 @@ function showLoadingState() {
     let progress = 0;
     const interval = setInterval(() => {
         progress += 2;
-        elements.progressFill.style.width = `${Math.min(progress, 90)}%`;
+        const currentProgress = Math.min(progress, 90);
         
-        // Update steps
-        if (progress >= 30) {
-            elements.step1.classList.add('completed');
-            elements.step1.querySelector('i').className = 'fas fa-check-circle';
-            elements.step2.classList.add('active');
+        if (elements.progressFill) {
+            elements.progressFill.style.width = `${currentProgress}%`;
         }
-        if (progress >= 60) {
-            elements.step2.classList.add('completed');
-            elements.step2.querySelector('i').className = 'fas fa-check-circle';
-            elements.step3.classList.add('active');
+        if (elements.progressPercent) {
+            elements.progressPercent.textContent = `${Math.round(currentProgress)}%`;
+        }
+        
+        // Update checklist items based on progress
+        if (progress >= 20) {
+            updateChecklistItem(elements.checkItem1, 'completed');
+            updateChecklistItem(elements.checkItem2, 'active');
+        }
+        if (progress >= 45) {
+            updateChecklistItem(elements.checkItem2, 'completed');
+            updateChecklistItem(elements.checkItem3, 'active');
+        }
+        if (progress >= 70) {
+            updateChecklistItem(elements.checkItem3, 'completed');
+            updateChecklistItem(elements.checkItem4, 'active');
+            // Update AI models
+            updateAIModel(elements.aiModel1, 'completed');
+            updateAIModel(elements.aiModel2, 'active');
         }
         
         if (progress >= 90) {
@@ -315,23 +350,60 @@ function showLoadingState() {
     }, 50);
 }
 
+// Update consultation progress steps
+function updateConsultationProgress(activeStep) {
+    if (!elements.consultationProgress) return;
+    
+    const steps = elements.consultationProgress.querySelectorAll('.progress-step');
+    
+    steps.forEach((step) => {
+        const stepNum = parseInt(step.getAttribute('data-step'));
+        step.classList.remove('active', 'completed');
+        
+        if (stepNum < activeStep) {
+            step.classList.add('completed');
+        } else if (stepNum === activeStep) {
+            step.classList.add('active');
+        }
+    });
+}
+
+// Update checklist item state
+function updateChecklistItem(item, state) {
+    if (item) {
+        item.classList.remove('active', 'completed');
+        if (state) {
+            item.classList.add(state);
+        }
+    }
+}
+
+// Update AI model indicator
+function updateAIModel(model, state) {
+    if (model) {
+        model.classList.remove('active', 'completed');
+        if (state) {
+            model.classList.add(state);
+        }
+    }
+}
+
 // Doctor review animation controller
 let doctorAnimationInterval = null;
 let thoughtIndex = 0;
-let actionIndex = 0;
 
 function startDoctorReviewAnimation() {
     thoughtIndex = 0;
-    actionIndex = 0;
     
-    // Reset all actions
-    const actions = [elements.action1, elements.action2, elements.action3, elements.action4];
-    actions.forEach((action, idx) => {
-        if (action) {
-            action.classList.remove('active', 'completed');
-            if (idx === 0) action.classList.add('active');
-        }
-    });
+    // Initialize checklist items
+    updateChecklistItem(elements.checkItem1, 'active');
+    updateChecklistItem(elements.checkItem2, null);
+    updateChecklistItem(elements.checkItem3, null);
+    updateChecklistItem(elements.checkItem4, null);
+    
+    // Initialize AI models
+    updateAIModel(elements.aiModel1, 'active');
+    updateAIModel(elements.aiModel2, null);
     
     // Update doctor thought
     if (elements.doctorThought) {
@@ -342,30 +414,13 @@ function startDoctorReviewAnimation() {
     doctorAnimationInterval = setInterval(() => {
         // Update thoughts
         thoughtIndex = (thoughtIndex + 1) % doctorThoughts.length;
-        if (elements.doctorThought) {
+        if (elements.doctorThought && elements.thoughtBubble) {
             // Fade out
             elements.thoughtBubble.style.opacity = '0.5';
             setTimeout(() => {
                 elements.doctorThought.textContent = doctorThoughts[thoughtIndex];
                 elements.thoughtBubble.style.opacity = '1';
             }, 200);
-        }
-        
-        // Update actions (every other thought change)
-        if (thoughtIndex % 2 === 0 && actionIndex < 3) {
-            const actions = [elements.action1, elements.action2, elements.action3, elements.action4];
-            
-            // Mark current as completed
-            if (actions[actionIndex]) {
-                actions[actionIndex].classList.remove('active');
-                actions[actionIndex].classList.add('completed');
-            }
-            
-            // Move to next action
-            actionIndex++;
-            if (actions[actionIndex]) {
-                actions[actionIndex].classList.add('active');
-            }
         }
     }, 1500);
 }
@@ -376,14 +431,15 @@ function stopDoctorReviewAnimation() {
         doctorAnimationInterval = null;
     }
     
-    // Mark all actions as completed
-    const actions = [elements.action1, elements.action2, elements.action3, elements.action4];
-    actions.forEach(action => {
-        if (action) {
-            action.classList.remove('active');
-            action.classList.add('completed');
-        }
-    });
+    // Mark all checklist items as completed
+    updateChecklistItem(elements.checkItem1, 'completed');
+    updateChecklistItem(elements.checkItem2, 'completed');
+    updateChecklistItem(elements.checkItem3, 'completed');
+    updateChecklistItem(elements.checkItem4, 'completed');
+    
+    // Mark all AI models as completed
+    updateAIModel(elements.aiModel1, 'completed');
+    updateAIModel(elements.aiModel2, 'completed');
     
     // Final thought
     if (elements.doctorThought) {
@@ -399,13 +455,25 @@ function hideLoadingState() {
     elements.loadingCard.style.display = 'none';
     
     // Reset loading state
-    elements.progressFill.style.width = '0%';
-    elements.step1.classList.remove('completed', 'active');
-    elements.step2.classList.remove('completed', 'active');
-    elements.step3.classList.remove('completed', 'active');
-    elements.step1.querySelector('i').className = 'fas fa-check-circle';
-    elements.step2.querySelector('i').className = 'fas fa-spinner fa-spin';
-    elements.step3.querySelector('i').className = 'fas fa-clock';
+    if (elements.progressFill) {
+        elements.progressFill.style.width = '0%';
+    }
+    if (elements.progressPercent) {
+        elements.progressPercent.textContent = '0%';
+    }
+    
+    // Reset consultation progress - if file still uploaded, show step 2, otherwise step 1
+    updateConsultationProgress(uploadedFile ? 2 : 1);
+    
+    // Reset checklist items
+    updateChecklistItem(elements.checkItem1, null);
+    updateChecklistItem(elements.checkItem2, null);
+    updateChecklistItem(elements.checkItem3, null);
+    updateChecklistItem(elements.checkItem4, null);
+    
+    // Reset AI models
+    updateAIModel(elements.aiModel1, null);
+    updateAIModel(elements.aiModel2, null);
 }
 
 function showResults(results) {
@@ -413,9 +481,25 @@ function showResults(results) {
     stopDoctorReviewAnimation();
     
     // Complete progress
-    elements.progressFill.style.width = '100%';
-    elements.step3.classList.add('completed');
-    elements.step3.querySelector('i').className = 'fas fa-check-circle';
+    if (elements.progressFill) {
+        elements.progressFill.style.width = '100%';
+    }
+    if (elements.progressPercent) {
+        elements.progressPercent.textContent = '100%';
+    }
+    
+    // Update all checklist items to completed
+    updateChecklistItem(elements.checkItem1, 'completed');
+    updateChecklistItem(elements.checkItem2, 'completed');
+    updateChecklistItem(elements.checkItem3, 'completed');
+    updateChecklistItem(elements.checkItem4, 'completed');
+    
+    // Update AI models to completed
+    updateAIModel(elements.aiModel1, 'completed');
+    updateAIModel(elements.aiModel2, 'completed');
+    
+    // Update consultation progress to final step (Report)
+    updateConsultationProgress(4);
     
     // Hide loading, show results
     setTimeout(() => {
@@ -562,6 +646,9 @@ function handleNewScan() {
     // Show upload card
     elements.resultsContainer.style.display = 'none';
     elements.uploadCard.style.display = 'block';
+    
+    // Reset consultation progress to step 1 (Check-In)
+    updateConsultationProgress(1);
     
     // Scroll to upload section
     document.getElementById('scan').scrollIntoView({ behavior: 'smooth' });
