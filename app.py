@@ -529,24 +529,31 @@ def post_process_segmentation(mask, min_area=100):
     return cleaned_mask
 
 
-def predict_tumor(image_path):
+def predict_tumor(image_path, img_original=None, use_tta=None):
     """
     Enhanced two-stage prediction with ensemble models and TTA:
     1. Classification: Does the image have a tumor? (Ensemble + TTA)
     2. Segmentation: If yes, where is the tumor located? (Ensemble + TTA)
-    
+
+    Args:
+        image_path:   Path to the uploaded image file.
+        img_original: Pre-loaded BGR numpy array. When provided, skips the
+                      disk read for a small I/O win. Falls back to imread.
+        use_tta:      Override TTA for this call. None defers to USE_TTA config.
+
     Returns detailed results including confidence scores and metrics.
     """
-    
-    # Read image
-    img_original = cv2.imread(image_path)
+    _use_tta = app.config['USE_TTA'] if use_tta is None else bool(use_tta)
+
+    # Read image — reuse already-loaded array when caller provides it
     if img_original is None:
-        # Try with PIL for better format support
-        try:
-            img_pil = Image.open(image_path)
-            img_original = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
-        except:
-            return None
+        img_original = cv2.imread(image_path)
+        if img_original is None:
+            try:
+                img_pil = Image.open(image_path)
+                img_original = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
+            except:
+                return None
     
     # ============================================================
     # STAGE 1: ENHANCED CLASSIFICATION (Ensemble + TTA)
@@ -555,7 +562,7 @@ def predict_tumor(image_path):
     img_class = preprocess_image_classification(img_original.copy())
     
     # Use ensemble prediction with TTA for robust tumor detection
-    classification_pred = ensemble_classification_predict(img_class, use_tta=app.config['USE_TTA'])
+    classification_pred = ensemble_classification_predict(img_class, use_tta=_use_tta)
     
     # Determine tumor presence with confidence
     tumor_probability = float(classification_pred[0][1])
@@ -573,7 +580,7 @@ def predict_tumor(image_path):
             'tumor': tumor_probability
         },
         'analysis_method': {
-            'tta_enabled': app.config['USE_TTA'],
+            'tta_enabled': _use_tta,
             'ensemble_enabled': app.config['USE_ENSEMBLE'],
             'classification_models_used': len(classification_models),
             'segmentation_models_used': len(segmentation_models)
@@ -587,7 +594,7 @@ def predict_tumor(image_path):
         img_seg = preprocess_image_segmentation(img_original.copy())
         
         # Use ensemble prediction with TTA
-        segmentation_pred = ensemble_segmentation_predict(img_seg, use_tta=app.config['USE_TTA'])
+        segmentation_pred = ensemble_segmentation_predict(img_seg, use_tta=_use_tta)
         
         # Get raw mask
         mask_raw = segmentation_pred[0].squeeze()
@@ -644,6 +651,8 @@ def predict_tumor(image_path):
         mask_base64 = base64.b64encode(mask_buffer).decode('utf-8')
         overlay_base64 = base64.b64encode(overlay_buffer).decode('utf-8')
         
+        _mask_conf = float(np.mean(mask_raw[mask_binary == 1])) if tumor_pixels > 0 else 0.0
+
         result['segmentation'] = {
             'mask': f"data:image/png;base64,{mask_base64}",
             'overlay': f"data:image/png;base64,{overlay_base64}",
@@ -652,7 +661,7 @@ def predict_tumor(image_path):
             'total_pixels': total_pixels,
             'bounding_box': bbox,
             'centroid': centroid,
-            'mask_confidence': float(np.mean(mask_raw[mask_binary == 1])) if tumor_pixels > 0 else 0.0
+            'mask_confidence': _mask_conf
         }
         
         # Calculate severity assessment
@@ -803,13 +812,13 @@ def predict_tumor(image_path):
             
             'bounding_box': bbox,
             'centroid': centroid,
-            'mask_confidence': f"{float(np.mean(mask_raw[mask_binary == 1])) * 100:.1f}%" if tumor_pixels > 0 else "N/A",
+            'mask_confidence': f"{_mask_conf * 100:.1f}%" if tumor_pixels > 0 else "N/A",
             
             'recommendations': recommendations,
             
             'analysis_metadata': {
                 'models_used': [name for name, _ in classification_models] + [name for name, _ in segmentation_models],
-                'tta_enabled': app.config['USE_TTA'],
+                'tta_enabled': _use_tta,
                 'ensemble_enabled': app.config['USE_ENSEMBLE'],
                 'processing_time': 'Real-time',
                 'ai_version': '2.0.0'
@@ -843,7 +852,7 @@ def predict_tumor(image_path):
             
             'analysis_metadata': {
                 'models_used': [name for name, _ in classification_models],
-                'tta_enabled': app.config['USE_TTA'],
+                'tta_enabled': _use_tta,
                 'ensemble_enabled': app.config['USE_ENSEMBLE'],
                 'processing_time': 'Real-time',
                 'ai_version': '2.0.0'
@@ -897,6 +906,10 @@ def predict():
             'error': 'Invalid file type. Allowed types: PNG, JPG, JPEG, TIF, TIFF'
         }), 400
     
+    # Resolve TTA preference: ?tta=false / ?tta=0 / ?tta=no disables TTA for this request
+    tta_param = request.args.get('tta', '').lower()
+    _use_tta = False if tta_param in ('false', '0', 'no') else app.config['USE_TTA']
+
     try:
         # Save uploaded file
         filename = secure_filename(file.filename)
@@ -914,8 +927,8 @@ def predict():
         _, img_buffer = cv2.imencode('.png', img_original)
         img_base64 = base64.b64encode(img_buffer).decode('utf-8')
         
-        # Make prediction
-        prediction_result = predict_tumor(filepath)
+        # Make prediction — pass already-loaded image to avoid a second disk read
+        prediction_result = predict_tumor(filepath, img_original=img_original, use_tta=_use_tta)
         
         if prediction_result is None:
             return jsonify({'error': 'Failed to process image'}), 500
