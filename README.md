@@ -407,6 +407,13 @@ Body: file=<MRI_image>, use_tta=true
 
 ---
 
+
+## Contributors
+
+<!-- CONTRIBUTORS_START -->
+<!-- CONTRIBUTORS_END -->
+---
+
 ## ⚠️ Disclaimer
 
 This is a research project for educational purposes. Not intended for clinical diagnosis without proper validation and regulatory approval (FDA/CE marking).
