@@ -8,6 +8,8 @@ let uploadedFile = null;
 let currentResults = null;
 let isAnalyzing = false;
 let loadingProgressInterval = null;
+let previewObjectUrl = null;
+let previewRequestId = 0;
 const analyzeButtonIdleHTML = `
     <span class="btn-content">
         <i class="fas fa-microscope"></i>
@@ -30,6 +32,8 @@ const elements = {
     fileInput: document.getElementById('fileInput'),
     imagePreview: document.getElementById('imagePreview'),
     previewImage: document.getElementById('previewImage'),
+    previewFallback: document.getElementById('previewFallback'),
+    previewFallbackText: document.getElementById('previewFallbackText'),
     removeBtn: document.getElementById('removeBtn'),
     analyzeBtn: document.getElementById('analyzeBtn'),
     
@@ -241,23 +245,68 @@ function validateAndPreviewFile(file) {
     previewImage(file);
 }
 
+function clearPreviewObjectUrl() {
+    if (previewObjectUrl) {
+        URL.revokeObjectURL(previewObjectUrl);
+        previewObjectUrl = null;
+    }
+}
+
+function resetPreviewState() {
+    clearPreviewObjectUrl();
+    previewRequestId += 1;
+    elements.previewImage.removeAttribute('src');
+    elements.previewImage.style.display = 'none';
+    elements.previewFallback.hidden = true;
+    elements.previewFallbackText.textContent = 'Preview is not available for this file format.';
+}
+
+function showPreviewFallback(file) {
+    elements.previewImage.style.display = 'none';
+    elements.previewImage.removeAttribute('src');
+    elements.previewFallbackText.textContent = `${file.name} is ready for analysis. Browser preview is not available for this file format.`;
+    elements.previewFallback.hidden = false;
+}
+
 function previewImage(file) {
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-        elements.previewImage.src = e.target.result;
+    resetPreviewState();
+
+    const requestId = previewRequestId;
+
+    try {
+        previewObjectUrl = URL.createObjectURL(file);
+    } catch (error) {
+        console.error('Unable to create MRI preview:', error);
+        showPreviewFallback(file);
         elements.uploadArea.style.display = 'none';
         elements.imagePreview.style.display = 'block';
         setAnalyzeControlsLoading(false);
-        
-        // Animate preview
         elements.imagePreview.classList.add('fade-in');
-        
-        // Update progress to step 2 (Upload Scan - completed uploading)
         updateConsultationProgress(2);
+        return;
+    }
+
+    elements.previewImage.onload = () => {
+        if (requestId !== previewRequestId) return;
+        elements.previewFallback.hidden = true;
+        elements.previewImage.style.display = 'block';
     };
-    
-    reader.readAsDataURL(file);
+
+    elements.previewImage.onerror = () => {
+        if (requestId !== previewRequestId) return;
+        showPreviewFallback(file);
+    };
+
+    elements.previewImage.src = previewObjectUrl;
+    elements.uploadArea.style.display = 'none';
+    elements.imagePreview.style.display = 'block';
+    setAnalyzeControlsLoading(false);
+
+    // Animate preview
+    elements.imagePreview.classList.add('fade-in');
+
+    // Update progress to step 2 (Upload Scan - completed uploading)
+    updateConsultationProgress(2);
 }
 
 function handleRemoveImage(e) {
@@ -270,7 +319,7 @@ function handleRemoveImage(e) {
     
     uploadedFile = null;
     elements.fileInput.value = '';
-    elements.previewImage.src = '';
+    resetPreviewState();
     elements.uploadArea.style.display = 'block';
     elements.imagePreview.style.display = 'none';
     elements.analyzeBtn.disabled = true;

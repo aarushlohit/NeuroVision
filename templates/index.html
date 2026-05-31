@@ -1245,7 +1245,14 @@
                                     </button>
                                 </div>
                                 <div class="preview-image-container">
-                                    <img id="previewImage" src="" alt="Preview">
+                                    <img id="previewImage" src="" alt="Uploaded MRI scan preview">
+                                    <div class="preview-fallback" id="previewFallback" hidden>
+                                        <i class="fas fa-file-medical" aria-hidden="true"></i>
+                                        <div>
+                                            <strong>MRI scan ready</strong>
+                                            <span id="previewFallbackText">Preview is not available for this file format.</span>
+                                        </div>
+                                    </div>
                                     <div class="preview-overlay">
                                         <div class="preview-badge">
                                             <i class="fas fa-check-circle"></i>
