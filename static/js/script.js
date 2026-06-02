@@ -10,6 +10,13 @@ let isAnalyzing = false;
 let loadingProgressInterval = null;
 let previewObjectUrl = null;
 let previewRequestId = 0;
+const supportedPreviewTypes = [
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'image/webp'
+];
+const supportedPreviewExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
 const analyzeButtonIdleHTML = `
     <span class="btn-content">
         <i class="fas fa-microscope"></i>
@@ -258,6 +265,7 @@ function resetPreviewState() {
     elements.previewImage.removeAttribute('src');
     elements.previewImage.style.display = 'none';
     elements.previewFallback.hidden = true;
+    elements.imagePreview.classList.remove('preview-has-fallback');
     elements.previewFallbackText.textContent = 'Preview is not available for this file format.';
 }
 
@@ -266,12 +274,29 @@ function showPreviewFallback(file) {
     elements.previewImage.removeAttribute('src');
     elements.previewFallbackText.textContent = `${file.name} is ready for analysis. Browser preview is not available for this file format.`;
     elements.previewFallback.hidden = false;
+    elements.imagePreview.classList.add('preview-has-fallback');
+}
+
+function canRenderBrowserPreview(file) {
+    const fileName = file.name.toLowerCase();
+    return supportedPreviewTypes.includes(file.type) ||
+           supportedPreviewExtensions.some(ext => fileName.endsWith(ext));
 }
 
 function previewImage(file) {
     resetPreviewState();
 
     const requestId = previewRequestId;
+
+    if (!canRenderBrowserPreview(file)) {
+        showPreviewFallback(file);
+        elements.uploadArea.style.display = 'none';
+        elements.imagePreview.style.display = 'block';
+        setAnalyzeControlsLoading(false);
+        elements.imagePreview.classList.add('fade-in');
+        updateConsultationProgress(2);
+        return;
+    }
 
     try {
         previewObjectUrl = URL.createObjectURL(file);

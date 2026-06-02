@@ -12516,6 +12516,10 @@ section {
     pointer-events: none;
 }
 
+.image-preview-v2.preview-has-fallback .preview-overlay {
+    display: none;
+}
+
 .preview-badge {
     display: inline-flex;
     align-items: center;
