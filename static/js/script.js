@@ -591,7 +591,7 @@ function hideLoadingState() {
         loadingProgressInterval = null;
     }
     
-    elements.uploadCard.style.display = 'block';
+    elements.uploadCard.style.display = 'grid';
     elements.loadingCard.style.display = 'none';
     setAnalyzeControlsLoading(false);
     
@@ -1092,7 +1092,7 @@ function handleNewScan() {
     
     // Show upload card
     elements.resultsContainer.style.display = 'none';
-    elements.uploadCard.style.display = 'block';
+    elements.uploadCard.style.display = 'grid';
     
     // Reset consultation progress to step 1 (Check-In)
     updateConsultationProgress(1);
